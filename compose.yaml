@@ -1,6 +1,30 @@
 name: altermec-asistencia
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        user: altermec
+        uid: 1000
+    container_name: altermec_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+    volumes:
+      - .:/var/www
+      - vendor_cache:/var/www/vendor
+      - node_modules_cache:/var/www/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   mysql:
     image: mysql:8.4
     container_name: altermec_mysql
@@ -23,3 +47,5 @@ services:
 
 volumes:
   mysql_data:
+  vendor_cache:
+  node_modules_cache:
