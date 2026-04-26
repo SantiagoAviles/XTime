@@ -24,6 +24,15 @@ class AuthController extends Controller
 
         // Verificar si está bloqueado por intentos fallidos
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            activity('auth')
+                ->withProperties([
+                    'email'      => $email,
+                    'ip'         => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ])
+                ->event('login_blocked')
+                ->log('login_blocked');
+
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors([
@@ -34,6 +43,15 @@ class AuthController extends Controller
         // Intentar autenticación
         if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             RateLimiter::hit($throttleKey, 15 * 60);
+
+            activity('auth')
+                ->withProperties([
+                    'email'      => $email,
+                    'ip'         => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ])
+                ->event('login_failed')
+                ->log('login_failed');
 
             return back()
                 ->withInput($request->only('email'))
@@ -46,6 +64,17 @@ class AuthController extends Controller
 
         // Validar que el usuario esté activo
         if (! $user->is_active) {
+            activity('auth')
+                ->causedBy($user)
+                ->withProperties([
+                    'email'      => $user->email,
+                    'user_id'    => $user->id,
+                    'ip'         => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ])
+                ->event('inactive_user_login_attempt')
+                ->log('inactive_user_login_attempt');
+
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -59,6 +88,17 @@ class AuthController extends Controller
 
         // Validar que el usuario tenga al menos un rol asignado
         if ($user->roles()->count() === 0) {
+            activity('auth')
+                ->causedBy($user)
+                ->withProperties([
+                    'email'      => $user->email,
+                    'user_id'    => $user->id,
+                    'ip'         => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ])
+                ->event('user_without_role_login_attempt')
+                ->log('user_without_role_login_attempt');
+
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -76,7 +116,17 @@ class AuthController extends Controller
         // Regenerar sesión
         $request->session()->regenerate();
 
-        // TODO: Registrar login en activity_log
+        // Registrar login exitoso en activity_log
+        activity('auth')
+            ->causedBy($user)
+            ->withProperties([
+                'email'      => $user->email,
+                'user_id'    => $user->id,
+                'ip'         => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->event('login_success')
+            ->log('login_success');
 
         // Redirigir según rol principal
         return $this->redirectByRole($user);
@@ -84,7 +134,20 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
-        // TODO: Registrar logout en activity_log
+        $user = Auth::user();
+
+        if ($user) {
+            activity('auth')
+                ->causedBy($user)
+                ->withProperties([
+                    'email'      => $user->email,
+                    'user_id'    => $user->id,
+                    'ip'         => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ])
+                ->event('logout')
+                ->log('logout');
+        }
 
         Auth::logout();
 
