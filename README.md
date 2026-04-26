@@ -123,15 +123,76 @@ routes/
 
 ## 9. Base de datos
 
-Migraciones activas:
+### Tablas Laravel base
 
-- `users`
-- `roles`, `permissions` y tablas pivote (Spatie)
-- `activity_log`
+| Tabla | Descripcion |
+|-------|-------------|
+| `users` | Autenticacion (email, password, is_active) |
+| `password_reset_tokens` | Tokens de recuperacion de contrasena |
+| `sessions` | Sesiones activas en BD |
+| `cache` / `cache_locks` | Cache de Laravel |
+| `jobs` / `job_batches` / `failed_jobs` | Cola de trabajos asincronos |
 
-Migraciones de negocio pendientes de activar:
+### Tablas Spatie Permission
 
-- `empleados`, `horarios`, `turnos`, `empleado_horario`, `asistencias`
+| Tabla | Descripcion |
+|-------|-------------|
+| `permissions` | Permisos del sistema |
+| `roles` | Roles del sistema |
+| `model_has_permissions` | Permisos asignados directamente a modelos |
+| `model_has_roles` | Roles asignados a usuarios |
+| `role_has_permissions` | Permisos que tiene cada rol |
+
+### Tabla Spatie Activity Log
+
+| Tabla | Descripcion |
+|-------|-------------|
+| `activity_log` | Registro de auditoría de cambios en modelos |
+
+### Tablas de negocio — Sprint 1
+
+| Tabla | Descripcion |
+|-------|-------------|
+| `areas` | Departamentos/areas de la empresa |
+| `empleados` | Empleados consolidados con SoftDelete |
+| `area_supervisor` | Pivot: supervisor asignado a un area |
+
+### Relaciones principales
+
+```
+User         1 ──── 0..1  Empleado
+Empleado     N ────── 1   Area           (area principal)
+Empleado     N ──────N    Area           (como supervisor) via area_supervisor
+User         N ──────N    Role           (Spatie)
+Role         N ──────N    Permission     (Spatie)
+```
+
+### Decision de diseno
+
+Los tipos de usuario del sistema anterior (Funcionario, Supervisor, Administrador, JefeOperaciones, Trabajador) se consolidan en una unica tabla `empleados`, diferenciandose por roles de Spatie. Esto evita duplicacion y simplifica las consultas.
+
+### Roles del sistema
+
+| Rol | Permisos clave |
+|-----|---------------|
+| Administrador | Todos |
+| RRHH | Gestion completa de empleados y areas |
+| Supervisor | Dashboard + ver empleados |
+| Jefe de Operaciones | Dashboard + ver empleados |
+| Empleado | Solo dashboard |
+
+### Permisos definidos
+
+`access_dashboard` · `view_employees` · `create_employees` · `edit_employees` · `delete_employees` · `manage_areas` · `assign_roles` · `view_activity_log`
+
+### Usuario administrador inicial
+
+| Campo | Valor |
+|-------|-------|
+| Email | admin@altermec.com |
+| Password | Admin1234! |
+| Rol | Administrador |
+| Area | Administracion |
 
 ## 10. Que quedo listo
 
@@ -139,24 +200,26 @@ Migraciones de negocio pendientes de activar:
 - MySQL dockerizado, `.env` y `.env.example` listos.
 - Bootstrap 5 integrado, layout Blade con navbar y sidebar.
 - Paquetes de Excel, PDF, permisos y auditoria instalados.
-- Migraciones base creadas y probadas.
+- Migraciones base creadas (areas, empleados, area_supervisor).
+- Seeders de roles, permisos, areas y usuario administrador.
 - Rutas web y API separadas.
 
 ## 11. Que falta desarrollar
 
+- Autenticacion con login/logout y recuperacion de contrasena.
+- CRUDs por modulo (empleados, areas, usuarios).
+- Vistas funcionales con Bootstrap.
 - Logica de asistencia, horarios y turnos.
-- CRUDs por modulo.
-- Vistas funcionales.
 - Reportes y exportaciones.
 - Integraciones con QR, RFID, DNI o biometria.
 - API REST.
-- Seeders de negocio.
 
 ## 12. Proximos pasos
 
-1. Autenticacion y roles de acceso.
-2. Seeders de roles (Administrador, Supervisor, JefeOperaciones, Trabajador).
-3. CRUD de empleados.
-4. Flujo de marcacion y regularizacion.
+1. Login, logout y recuperacion de contrasena.
+2. CRUD de empleados con validaciones.
+3. CRUD de areas.
+4. Dashboard por rol.
+5. Flujo de marcacion y regularizacion.
 5. Reportes y exportaciones Excel/PDF.
 
