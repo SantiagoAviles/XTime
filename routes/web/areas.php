@@ -7,8 +7,8 @@ Route::middleware(['auth', 'role_or_permission:Administrador|RRHH|manage_areas']
     ->prefix('areas')
     ->name('areas.')
     ->group(function (): void {
+        Route::get('/', fn () => response('Módulo de áreas — próximamente', 200))->name('index');
         // TODO: Implementar gestión de áreas en Sprint 1 - Bloque 4.
-        // Route::get('/', [AreaController::class, 'index'])->name('index');
         // Route::get('/crear', [AreaController::class, 'create'])->name('create');
         // Route::post('/', [AreaController::class, 'store'])->name('store');
         // Route::get('/{area}/editar', [AreaController::class, 'edit'])->name('edit');

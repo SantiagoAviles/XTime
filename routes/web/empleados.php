@@ -7,8 +7,8 @@ Route::middleware(['auth', 'role_or_permission:Administrador|RRHH|view_employees
     ->prefix('empleados')
     ->name('empleados.')
     ->group(function (): void {
+        Route::get('/', fn () => response('Módulo de empleados — próximamente', 200))->name('index');
         // TODO: Implementar CRUD completo de empleados en Sprint 1 - Bloque 4.
-        // Route::get('/', [EmpleadoController::class, 'index'])->name('index');
         // Route::get('/crear', [EmpleadoController::class, 'create'])->name('create');
         // Route::post('/', [EmpleadoController::class, 'store'])->name('store');
         // Route::get('/{empleado}/editar', [EmpleadoController::class, 'edit'])->name('edit');
