@@ -1,14 +1,18 @@
 <?php
 
+use App\Http\Controllers\Web\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
-// Acceso: solo Administrador o permiso assign_roles
+// Acceso: Administrador o permiso assign_roles
 Route::middleware(['auth', 'role_or_permission:Administrador|assign_roles'])
     ->prefix('seguridad')
     ->name('seguridad.')
     ->group(function (): void {
-        Route::get('/', fn () => response('Módulo de seguridad — próximamente', 200))->name('index');
-        // TODO: Implementar gestión de usuarios y roles en Sprint 1 - Bloque 5.
-        // Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-        // Route::get('/roles', [RolController::class, 'index'])->name('roles.index');
+        Route::get('/', fn () => redirect()->route('seguridad.usuarios.index'))->name('index');
+
+        Route::prefix('usuarios')->name('usuarios.')->group(function () {
+            Route::get('/',               [UsuarioController::class, 'index'])->name('index');
+            Route::get('/{usuario}',      [UsuarioController::class, 'edit'])->name('edit');
+            Route::put('/{usuario}',      [UsuarioController::class, 'update'])->name('update');
+        });
     });
