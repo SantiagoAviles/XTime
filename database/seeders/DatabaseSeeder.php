@@ -14,7 +14,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             AreaSeeder::class,
+            TurnoSeeder::class,
+            FeriadoSeeder::class,
+            ReglaHoraExtraSeeder::class,
+            MetodoMarcacionSeeder::class,
             AdminUserSeeder::class,
+            EmpleadosDemoSeeder::class,
         ]);
     }
 }
