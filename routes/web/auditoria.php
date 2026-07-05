@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Web\AuditoriaController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('auditoria')->name('auditoria.')->group(function (): void {
-    // Rutas web reservadas para auditoria y trazabilidad.
-});
+Route::middleware(['auth', 'role_or_permission:Administrador|view_activity_log'])
+    ->prefix('auditoria')->name('auditoria.')
+    ->group(function (): void {
+        Route::get('/', [AuditoriaController::class, 'index'])->name('index');
+    });
