@@ -167,12 +167,8 @@ class AuthController extends Controller
         $roleName = strtolower($user->roles()->first()?->name ?? '');
 
         return match ($roleName) {
-            'administrador', 'admin'           => redirect()->route('dashboard'),
-            'rrhh'                              => redirect()->route('dashboard'),
-            'supervisor'                        => redirect()->route('dashboard'),
-            'jefe de operaciones'               => redirect()->route('dashboard'),
-            'empleado'                          => redirect()->route('dashboard'),
-            default                             => redirect()->route('dashboard'),
+            'empleado' => redirect()->route('autogestion.dashboard'),
+            default    => redirect()->route('dashboard'),
         };
     }
 }

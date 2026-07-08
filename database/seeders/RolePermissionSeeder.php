@@ -15,47 +15,64 @@ class RolePermissionSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permissions = [
+        $permisos = [
             'access_dashboard',
-            'view_employees',
-            'create_employees',
-            'edit_employees',
-            'delete_employees',
+            'view_employees', 'create_employees', 'edit_employees', 'delete_employees',
             'manage_areas',
             'assign_roles',
             'view_activity_log',
+            'manage_turnos', 'view_turnos',
+            'manage_feriados', 'manage_reglas_horas_extra',
+            'mark_attendance_self', 'mark_attendance_manual',
+            'view_attendance_panel', 'view_attendance_own_area',
+            'view_attendance_history',
+            'view_self_portal', 'request_justifications',
+            'approve_justifications', 'manage_justifications',
+            'view_reports', 'view_reports_own_area', 'view_self_report',
         ];
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        foreach ($permisos as $p) {
+            Permission::firstOrCreate(['name' => $p, 'guard_name' => 'web']);
         }
 
         $roles = [
-            'Administrador' => $permissions,
+            'Administrador' => $permisos,
             'RRHH' => [
                 'access_dashboard',
-                'view_employees',
-                'create_employees',
-                'edit_employees',
-                'delete_employees',
+                'view_employees', 'create_employees', 'edit_employees', 'delete_employees',
                 'manage_areas',
+                'manage_turnos', 'view_turnos', 'manage_feriados', 'manage_reglas_horas_extra',
+                'mark_attendance_manual',
+                'view_attendance_panel', 'view_attendance_history',
+                'manage_justifications',
+                'view_reports',
             ],
             'Supervisor' => [
                 'access_dashboard',
                 'view_employees',
+                'view_turnos',
+                'view_attendance_own_area',
+                'approve_justifications',
+                'view_reports_own_area',
             ],
             'Jefe de Operaciones' => [
                 'access_dashboard',
                 'view_employees',
+                'view_turnos',
+                'view_attendance_panel',
+                'view_reports',
             ],
             'Empleado' => [
-                'access_dashboard',
+                'view_self_portal',
+                'mark_attendance_self',
+                'request_justifications',
+                'view_self_report',
             ],
         ];
 
-        foreach ($roles as $roleName => $rolePermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-            $role->syncPermissions($rolePermissions);
+        foreach ($roles as $rolNombre => $perms) {
+            $rol = Role::firstOrCreate(['name' => $rolNombre, 'guard_name' => 'web']);
+            $rol->syncPermissions($perms);
         }
     }
 }
