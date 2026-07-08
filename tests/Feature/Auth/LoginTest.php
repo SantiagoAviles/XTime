@@ -40,7 +40,7 @@ class LoginTest extends TestCase
 
     public function test_usuario_activo_con_rol_puede_iniciar_sesion(): void
     {
-        $user = $this->crearUsuarioConRol();
+        $user = $this->crearUsuarioConRol('Administrador');
 
         $response = $this->post('/login', [
             'email'    => $user->email,
@@ -48,6 +48,19 @@ class LoginTest extends TestCase
         ]);
 
         $response->assertRedirect('/dashboard');
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_empleado_es_redirigido_a_autogestion_no_al_dashboard_general(): void
+    {
+        $user = $this->crearUsuarioConRol('Empleado');
+
+        $response = $this->post('/login', [
+            'email'    => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/autogestion');
         $this->assertAuthenticatedAs($user);
     }
 
